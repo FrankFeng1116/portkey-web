@@ -6,7 +6,7 @@ import { BaseContract } from './baseContract';
 export class Web3Contract extends BaseContract implements IPortkeyContract {
   chainId?: ChainId;
 
-  encodedTx<T = any>(_functionName: string, _paramsOption?: any): Promise<ViewResult<T>> {
+  encodedTx<T = any>(_functionName: string, _paramsOption?: any, _callOptions?: CallOptions): Promise<ViewResult<T>> {
     throw new Error('Method not implemented.');
   }
 
