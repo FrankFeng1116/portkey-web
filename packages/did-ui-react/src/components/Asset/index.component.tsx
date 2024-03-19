@@ -35,7 +35,7 @@ import CustomSvg from '../CustomSvg';
 import './index.less';
 import { mixRampShow } from '../Ramp/utils';
 import { Button } from 'antd';
-import DeleteAccount from '../DeleteAccount';
+import DeleteAccount from '../DeleteAccount/index.component';
 import { useIsShowDeletion } from '../../hooks/wallet';
 
 export enum AssetStep {
@@ -63,6 +63,7 @@ export interface AssetMainProps
   className?: string;
   isShowRampBuy?: boolean;
   isShowRampSell?: boolean;
+  onDeleteAccount?: () => void;
   onLifeCycleChange?(liftCycle: `${AssetStep}`): void;
 }
 
@@ -84,6 +85,7 @@ function AssetMain({
   isShowRampBuy = true,
   isShowRampSell = true,
   onOverviewBack,
+  onDeleteAccount,
   onLifeCycleChange,
 }: AssetMainProps) {
   const [{ networkType, sandboxId }] = usePortkey();
@@ -463,7 +465,7 @@ function AssetMain({
                 title: 'My',
                 onBack: () => setAssetStep(AssetStep.overview),
               }}
-              isShowFooter={!showDeletion} // TODO delete w
+              isShowFooter={showDeletion} // TODO delete w
               footerElement={
                 <Button
                   className="delete-account-button"
@@ -477,10 +479,7 @@ function AssetMain({
         )}
 
         {assetStep === AssetStep.deleteAccount && (
-          <DeleteAccount
-            onBack={() => setAssetStep(AssetStep.my)}
-            onCloseAccountCancellationModal={() => setAssetStep(AssetStep.my)}
-          />
+          <DeleteAccount onBack={() => setAssetStep(AssetStep.my)} onDelete={onDeleteAccount} />
         )}
 
         {assetStep === AssetStep.guardians && (
