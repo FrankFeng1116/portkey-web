@@ -1,5 +1,5 @@
 import { usePortkeyAsset } from '../context/PortkeyAssetProvider';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AssetOverviewMain, { AssetOverviewProps } from '../AssetOverview/index.components';
 import ReceiveCard from '../ReceiveCard/index.components';
 import { basicAssetViewAsync } from '../context/PortkeyAssetProvider/actions';
@@ -93,7 +93,6 @@ function AssetMain({
 
   const [assetStep, setAssetStep] = useState<AssetStep>(AssetStep.overview);
   const preStepRef = useRef<AssetStep>(AssetStep.overview);
-  const showDeletion = useIsShowDeletion();
   const [isMixShowRamp, setIsMixShowRamp] = useState<boolean>(isShowRamp);
   const [isMixShowBuy, setIsMixShowBuy] = useState<boolean>(isShowRampBuy);
   const [isMixShowSell, setIsMixShowSell] = useState<boolean>(isShowRampSell);
@@ -116,6 +115,8 @@ function AssetMain({
   useUpdateEffect(() => {
     onLifeCycleChange?.(assetStep || AssetStep.overview);
   }, [assetStep]);
+
+  const getShowDeletion = useIsShowDeletion();
 
   const maxNftNum = useNFTMaxCount();
 
@@ -160,6 +161,15 @@ function AssetMain({
       getRampEntry();
     }
   }, [caAddressInfos, dispatch, getAllTokenList, getRampEntry, initialized, maxNftNum]);
+
+  const [showDeletion, setShowDeletion] = useState<boolean>();
+
+  useEffect(() => {
+    console.log(initialized, 'initialized==');
+    if (initialized) {
+      getShowDeletion().then(setShowDeletion);
+    }
+  }, [getShowDeletion, initialized]);
 
   useDebounce(getAssetInfo, 300);
 
