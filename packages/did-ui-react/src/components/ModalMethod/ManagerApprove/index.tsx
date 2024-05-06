@@ -15,6 +15,7 @@ const managerApprove = async ({
 }: ManagerApproveProps): Promise<{
   amount: string;
   guardiansApproved: IGuardiansApproved[];
+  useAllToken: boolean;
 }> =>
   new Promise((resolve, reject) => {
     const onCancel = () => {
