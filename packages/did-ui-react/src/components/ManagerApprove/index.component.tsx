@@ -31,7 +31,7 @@ export interface IManagerApproveResult {
 export interface ManagerApproveInnerProps extends BaseManagerApproveInnerProps {
   onCancel?: () => void;
   onError?: (error: Error) => void;
-  onFinish?: (res: { amount: string; guardiansApproved: IGuardiansApproved[] }) => void;
+  onFinish?: (res: { amount: string; guardiansApproved: IGuardiansApproved[]; useAllToken: boolean }) => void;
 }
 export enum ManagerApproveStep {
   SetAllowance = 'SetAllowance',
@@ -70,6 +70,7 @@ export default function ManagerApproveInner({
   const DEFAULT_SYMBOL_DECIMAL = useMemo(() => (isNFT(symbol) ? DEFAULT_NFT_DECIMAL : DEFAULT_DECIMAL), [symbol]);
 
   const [allowance, setAllowance] = useState<string>(divDecimals(amount, DEFAULT_SYMBOL_DECIMAL).toFixed());
+  const [useAllToken, setUseAllToken] = useState<boolean>(false);
 
   const [guardianList, setGuardianList] = useState<BaseGuardianItem[]>();
 
@@ -120,7 +121,9 @@ export default function ManagerApproveInner({
   const allowanceConfirm = useCallback(
     async (allowanceInfo: IAllowance) => {
       try {
-        setAllowance(allowanceInfo.allowance);
+        const { allowance, useAllToken = false } = allowanceInfo;
+        setAllowance(allowance);
+        setUseAllToken(useAllToken);
         setLoading(true);
 
         const guardianList = await getGuardianList();
@@ -209,6 +212,7 @@ export default function ManagerApproveInner({
               await onFinish?.({
                 amount: timesDecimals(allowance, tokenInfo?.decimals ?? DEFAULT_SYMBOL_DECIMAL).toFixed(0),
                 guardiansApproved: approved,
+                useAllToken,
               });
             }}
             // onError={(error) => onError?.(Error(handleErrorMessage(error.error)))}

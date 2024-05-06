@@ -1,4 +1,4 @@
-import { Input } from 'antd';
+import { Checkbox, Input } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { parseInputNumberChange } from '../../utils/input';
 import BigNumber from 'bignumber.js';
@@ -6,6 +6,7 @@ import './index.less';
 import { isValidNumber } from '../../utils';
 import clsx from 'clsx';
 import ThrottleButton from '../ThrottleButton';
+import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 
 const PrefixCls = 'set-allowance';
 export interface BaseSetAllowanceProps {
@@ -19,6 +20,7 @@ export interface BaseSetAllowanceProps {
 
 export interface IAllowance {
   allowance: string;
+  useAllToken?: boolean;
 }
 
 export interface SetAllowanceHandlerProps {
@@ -53,6 +55,8 @@ export default function SetAllowanceMain({
 
   const [error, setError] = useState<string>('');
 
+  const [useAllToken, setUseAllToken] = useState<boolean>(false);
+
   const inputChange = useCallback(
     (amount: string | number) => {
       if (isValidNumber(`${amount}`)) {
@@ -63,6 +67,13 @@ export default function SetAllowanceMain({
       setError('');
     },
     [formatAllowanceInput, onAllowanceChange],
+  );
+
+  const onAllowAllTokenChange = useCallback(
+    (e: CheckboxChangeEvent) => {
+      setUseAllToken(!!e.target.checked);
+    },
+    [setUseAllToken],
   );
 
   return (
@@ -78,14 +89,14 @@ export default function SetAllowanceMain({
       <div className={`${PrefixCls}-header`}>
         <h1 className={`portkey-ui-text-center ${PrefixCls}-title`}>{`Request for access to your ${symbol}`}</h1>
         <div className={`portkey-ui-text-center ${PrefixCls}-description`}>
-          To ensure your assets&rsquo; security while interacting with the DApp, please set a token allowance for this
-          DApp. The DApp will notify you when its allowance is used up and you can modify the settings again.
+          To keep your funds safe, please set a token allowance for the contract. Without an allowance or with
+          insufficient allowance, some process may be stuck
         </div>
       </div>
 
       <div className={`${PrefixCls}-body`}>
         <div className={`portkey-ui-flex-between-center ${PrefixCls}-body-title`}>
-          <span className={`${PrefixCls}-set`}>{`Set Allowance (${symbol})`}</span>
+          <span className={`${PrefixCls}-set`}>{`Set Allowance`}</span>
           <span className={`${PrefixCls}-use-recommended`} onClick={() => inputChange(recommendedAmount)}>
             Use Recommended Value
           </span>
@@ -100,8 +111,13 @@ export default function SetAllowanceMain({
           />
           {typeof error !== 'undefined' && <div className="error-text">{error}</div>}
         </div>
+        <div className={`${PrefixCls}-confirm-line`}>
+          <Checkbox className={`${PrefixCls}-confirm-line-checkbox`} onChange={onAllowAllTokenChange} />
+          <div className={`${PrefixCls}-confirm-line-text`}>Approve other token at same time</div>
+        </div>
         <div className={`${PrefixCls}-notice`}>
-          Within this allowance limit, the Dapp does not require reconfirmation from you when a transaction occurs.
+          Just input a single number that you consider a reasonable current or future contract expenditure, and you can
+          always increase the spending limit later.
         </div>
       </div>
       <div className="portkey-ui-flex-1 portkey-ui-flex-column-reverse">
@@ -113,9 +129,9 @@ export default function SetAllowanceMain({
             onClick={() => {
               if (!isValidNumber(allowance)) return setError('Please enter a positive whole number');
               if (BigNumber(allowance).lte(0)) return setError('Please enter a non-zero value');
-              onConfirm?.({ allowance });
+              onConfirm?.({ allowance, useAllToken });
             }}>
-            Authorize
+            Pre-authorize
           </ThrottleButton>
         </div>
       </div>
